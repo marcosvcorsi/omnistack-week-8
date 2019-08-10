@@ -5,15 +5,16 @@ import { View, Text, SafeAreaView, Image, StyleSheet, TouchableOpacity} from 're
 import logo from '../assets/logo.png';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
+import itsamatch from '../assets/itsamatch.png';
 
 import api from '../services/api'
+import io from 'socket.io-client'
 
 function Main({ navigation }){
     const userId = navigation.getParam('userId');
 
-    console.log(userId);
-
     const [users, setUsers] = useState([]);
+    const [matchDev, setMatchDev] = useState(null);
 
     useEffect(() => {
         async function loadUsers(){
@@ -27,7 +28,17 @@ function Main({ navigation }){
         }
 
         loadUsers();
-    }, [userId])
+    }, [userId]);
+
+    useEffect(() => {
+        const socket = io('http://192.168.1.110:3333', {
+          query: { user: userId}    
+        });
+  
+        socket.on('match', dev => {
+          setMatchDev(dev);
+        });
+      }, [userId]);
 
     async function handleLike(){
         const [user, ...rest] = users;
@@ -86,6 +97,20 @@ function Main({ navigation }){
     
                     <TouchableOpacity style={styles.button} onPress={handleLike}>
                         <Image source={like} />  
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            { matchDev && (
+                <View style={[styles.matchContainer, {zIndex: users.length + 1}]}>
+                    <Image source={itsamatch} styles={styles.matchImage}/>
+
+                    <Image style={styles.matchAvatar} source={{uri: matchDev.avatar}} />
+                    <Text style={styles.matchName}>{matchDev.name}</Text>
+                    <Text style={styles.matchBio}>{matchDev.bio}</Text>
+
+                    <TouchableOpacity onPress={() => setMatchDev(null)}>
+                        <Text style={styles.closeMatch}>Fechar</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -166,10 +191,54 @@ const styles = StyleSheet.create({
         elevation: 2
     },
 
-    emty: {
+    empty: {
         alignSelf: 'center',
         color: '#999',
         fontSize: 24,
+        fontWeight: 'bold'
+    },
+
+    matchContainer: {
+        ... StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    matchImage: {
+        height: 60,
+        resizeMode: 'contain'
+    },  
+
+    matchAvatar: {
+        width: 160,
+        height: 160,
+        borderRadius: 80,
+        borderWidth: 5,
+        borderColor: '#FFF',
+        marginVertical: 30
+    },
+
+    matchName: {
+        fontSize: 26,
+        fontWeight: 'bold',
+        color: '#FFF'
+    },
+
+    matchBio: {
+        marginTop: 10,
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.8)',
+        lineHeight: 24,
+        textAlign: 'center',
+        paddingHorizontal: 30
+    },
+
+    closeMatch: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.8)',
+        textAlign: 'center',
+        marginTop: 30,
         fontWeight: 'bold'
     }
 });
