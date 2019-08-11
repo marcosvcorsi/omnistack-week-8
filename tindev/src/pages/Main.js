@@ -2,6 +2,8 @@ import React, { useEffect, useState }from 'react';
 import AsyncStorage from '@react-native-community/async-storage'
 import { View, Text, SafeAreaView, Image, StyleSheet, TouchableOpacity} from 'react-native';
 
+import ENV from '../enviroments/enviroment'
+
 import logo from '../assets/logo.png';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
@@ -31,7 +33,7 @@ function Main({ navigation }){
     }, [userId]);
 
     useEffect(() => {
-        const socket = io('http://192.168.1.110:3333', {
+        const socket = io(ENV.BASE_URL, {
           query: { user: userId}    
         });
   
