@@ -8,6 +8,7 @@ import like from '../assets/like.svg';
 import dislike from '../assets/dislike.svg';
 import itsamatch from '../assets/itsamatch.png';
 
+import ENV from '../enviroments/enviroment';
 import api from '../services/api';
 
 function Main({ match }){
@@ -30,7 +31,7 @@ function Main({ match }){
 
     
     useEffect(() => {
-      const socket = io('http://localhost:3333', {
+      const socket = io(ENV.BASE_URL, {
         query: { user: match.params.id }    
       });
 
